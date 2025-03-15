@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="b7e0b21105e74de9bfc3ad71380c32ac" Name="Diagram1">
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.ChamCong" Width="1.5" PointX="5.25" PointY="1.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.DanhGiaNhanVien" Width="1.5" PointX="5.25" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.Luong" Width="1.5" PointX="5.25" PointY="7.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.NghiPhep" Width="1.5" PointX="5.25" PointY="10.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.NguoiDung" Width="1.5" PointX="5.25" PointY="13.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.NhanVien" Width="1.5" PointX="3" PointY="6" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.PhongBan" Width="1.5" PointX="0.75" PointY="7.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.sysdiagram" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.TrangThaiCongViec" Width="1.5" PointX="0.75" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="QUANLYNHANSUModel.ViTriCongViec" Width="1.5" PointX="0.75" PointY="11.125" IsExpanded="true" />
+        <AssociationConnector Association="QUANLYNHANSUModel.FK_ChamCong" ManuallyRouted="false" />
+        <AssociationConnector Association="QUANLYNHANSUModel.FK_DanhGiaNhanVien" ManuallyRouted="false" />
+        <AssociationConnector Association="QUANLYNHANSUModel.FK_Luong" ManuallyRouted="false" />
+        <AssociationConnector Association="QUANLYNHANSUModel.FK_NghiPhep" ManuallyRouted="false" />
+        <AssociationConnector Association="QUANLYNHANSUModel.FK_NguoiDung" ManuallyRouted="false" />
+        <AssociationConnector Association="QUANLYNHANSUModel.FK_NhanVien" ManuallyRouted="false" />
+        <AssociationConnector Association="QUANLYNHANSUModel.FK_NhanVien2" ManuallyRouted="false" />
+        <AssociationConnector Association="QUANLYNHANSUModel.FK_NhanVien3" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

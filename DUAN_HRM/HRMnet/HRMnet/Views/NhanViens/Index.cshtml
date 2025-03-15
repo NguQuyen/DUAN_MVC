@@ -1,0 +1,264 @@
+﻿@model IEnumerable<HRMnet.Models.NhanVien>
+
+@{
+    ViewBag.Title = "Employees";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container" style="margin-top:20px;">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <p style="margin-top:20px;">
+                <button id="AddNew" type="button" class="btn btn-success">
+                    Add New
+                </button>
+                <input type="text" id="searchQuery" placeholder="Search..." class="form-control" style="display:inline-block; width:auto;">
+            </p>
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.First().HoTen)</th>
+                        <th>@Html.DisplayNameFor(model => model.First().GioiTinh)</th>
+                        <th>@Html.DisplayNameFor(model => model.First().NgaySinh)</th>
+                        <th>@Html.DisplayNameFor(model => model.First().DiaChi)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tblBody">
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation">
+                <ul class="pagination" id="pagination">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Add/Edit Employee -->
+<div class="modal fade" id="employeeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="examleModalLabel">Employee</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @Html.Action("AddOrEdit")
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <input type="button" value="Save" id="btnSaveEmp" class="btn btn-success pull-left" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Employee Details -->
+<div class="modal fade" id="employeeDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="examleModalLabel">Employee Details</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>HoTen</th>
+                        <td id="detailHoTen"></td>
+                    </tr>
+                    <tr>
+                        <th>GioiTinh</th>
+                        <td id="detailGioiTinh"></td>
+                    </tr>
+                    <tr>
+                        <th>NgaySinh</th>
+                        <td id="detailNgaySinh"></td>
+                    </tr>
+                    <tr>
+                        <th>DiaChi</th>
+                        <td id="detailDiaChi"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        getEmployeeData();
+
+        function getEmployeeData(page = 1, searchQuery = "") {
+            $.ajax({
+                type: "GET",
+                url: "/NhanViens/SearchEmp",
+                data: { searchQuery: searchQuery, page: page, pageSize: 5 },
+                success: function (data) {
+                    $("#tblBody").empty();
+                    if (data.getInfo.length > 0) {
+                        for (var i = 0; i < data.getInfo.length; i++) {
+                            $("#tblBody").append("<tr>" +
+                                "<td>" + data.getInfo[i].HoTen + "</td>" +
+                                "<td>" + data.getInfo[i].GioiTinh + "</td>" +
+                                "<td>" + formatDate(data.getInfo[i].NgaySinh) + "</td>" +
+                                "<td>" + data.getInfo[i].DiaChi + "</td>" +
+                                "<td>" +
+                                "<a href='#' onclick='getEmployeeById(" + data.getInfo[i].MaNhanVien + ")' class='btn btn-success'>Edit</a> " +
+                                "<a href='#' onclick='viewEmployeeDetails(" + data.getInfo[i].MaNhanVien + ")' class='btn btn-info'>View</a> " +
+                                "<a href='#' onclick='DeleteEmployee(" + data.getInfo[i].MaNhanVien + ")' class='btn btn-danger'>Delete</a>" +
+                                "</td>" +
+                                "</tr>");
+                        }
+                        updatePagination(data.totalPages, data.currentPage);
+                    }
+                },
+                error: function (er) {
+                    alert(er);
+                }
+            });
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return "";
+            var date = new Date(dateString);
+            var day = ("0" + date.getDate()).slice(-2);
+            var month = ("0" + (date.getMonth() + 1)).slice(-2);
+            return date.getFullYear() + "-" + month + "-" + day;
+        }
+
+        $("#AddNew").click(function () {
+            $("#employeeForm")[0].reset();
+            $("#MaNhanVien").val(0);
+            $("#btnSaveEmp").val("Add Employee");
+            $("#btnSaveEmp").addClass("btn-success");
+            $("#btnSaveEmp").removeClass("btn-primary");
+            $(".modal-title").text("Add New Employee");
+            $("#employeeModal").modal('show');
+        });
+
+        $("#btnSaveEmp").click(function () {
+            var oForm = document.forms["employeeForm"];
+            if ($("#employeeForm").valid()) {
+                var empID = $("#MaNhanVien").val();
+                var ajaxConfig = {
+                    type: "POST",
+                    url: empID == 0 ? "/NhanViens/AddEmployee" : "/NhanViens/UpdateEmployee",
+                    data: new FormData(oForm),
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        if (data.success) {
+                            getEmployeeData();
+                            alert(data.message);
+                            $("#employeeModal").modal('hide');
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function (er) {
+                        alert("Error: " + er);
+                    }
+                };
+                $.ajax(ajaxConfig);
+                return false;
+            }
+        });
+
+        function getEmployeeById(id) {
+            $("#employeeForm")[0].reset();
+            $.ajax({
+                type: "GET",
+                url: "/NhanViens/GetEmployeeById",
+                data: { empID: id },
+                success: function (response) {
+                    if (response.success) {
+                        $("#MaNhanVien").val(response.data.MaNhanVien);
+                        $("#HoTen").val(response.data.HoTen);
+                        $("#GioiTinh").val(response.data.GioiTinh);
+                        $("#NgaySinh").val(response.data.NgaySinh);
+                        $("#DiaChi").val(response.data.DiaChi);
+
+                        $(".modal-title").text("Update Employee");
+                        $("#btnSaveEmp").val("Update Employee");
+                        $("#btnSaveEmp").removeClass("btn-success").addClass("btn-primary");
+                        $("#employeeModal").modal('show');
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (er) {
+                    alert("Error: " + er);
+                }
+            });
+        }
+
+        function DeleteEmployee(id) {
+            if (confirm("Are you sure you want to delete this employee?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "/NhanViens/DeleteEmployee",
+                    data: { empID: id },
+                    success: function (response) {
+                        if (response.success) {
+                            getEmployeeData();
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (er) {
+                        alert("Error: " + er);
+                    }
+                });
+            }
+        }
+
+        function viewEmployeeDetails(id) {
+            $.ajax({
+                type: "GET",
+                url: "/NhanViens/GetEmployeeDetails",
+                data: { empID: id },
+                success: function (response) {
+                    if (response.success) {
+                        $("#detailHoTen").text(response.data.HoTen);
+                        $("#detailGioiTinh").text(response.data.GioiTinh);
+                        $("#detailNgaySinh").text(formatDate(response.data.NgaySinh));
+                        $("#detailDiaChi").text(response.data.DiaChi);
+
+                        $(".modal-title").text("Employee Details");
+                        $("#employeeDetailModal").modal('show');
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (er) {
+                    alert("Error: " + er);
+                }
+            });
+        }
+
+        function updatePagination(totalPages, currentPage) {
+            $("#pagination").empty();
+            for (var i = 1; i <= totalPages; i++) {
+                var activeClass = i === currentPage ? 'active' : '';
+                $("#pagination").append(`<li class="page-item ${activeClass}"><a class="page-link" href="#" onclick="getEmployeeData(${i})">${i}</a></li>`);
+            }
+        }
+
+        $("#searchQuery").on("input", function () {
+            var searchQuery = $(this).val();
+            getEmployeeData(1, searchQuery);
+        });
+    </script>
+}

@@ -1,0 +1,262 @@
+﻿@model IEnumerable<HRMnet.Models.PhongBan>
+@{
+    ViewBag.Title = "Quản lý Phòng Ban";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container" style="margin-top:20px;">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <p style="margin-top:20px;">
+                <button id="AddNew" type="button" class="btn btn-success">
+                    Thêm mới
+                </button>
+                <input type="text" id="searchQuery" placeholder="Tìm kiếm..." class="form-control" style="display:inline-block; width:auto;">
+            </p>
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Mã Phòng Ban</th>
+                        <th>Tên Phòng Ban</th>
+                        <th>Mô Tả</th>
+                        <th>Số Điện Thoại</th>
+                        <th>Email</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="tblBody">
+                </tbody>
+            </table>
+            <nav aria-label="Page navigation">
+                <ul class="pagination" id="pagination">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Add/Edit Phong Ban -->
+<div class="modal fade" id="phongBanModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Phòng Ban</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @Html.Action("AddOrEdit")
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <input type="button" value="Lưu" id="btnSavePhongBan" class="btn btn-success pull-left" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Phong Ban Details -->
+<div class="modal fade" id="phongBanDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Chi Tiết Phòng Ban</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Mã Phòng Ban</th>
+                        <td id="detailMaPhongBan"></td>
+                    </tr>
+                    <tr>
+                        <th>Tên Phòng Ban</th>
+                        <td id="detailTenPhongBan"></td>
+                    </tr>
+                    <tr>
+                        <th>Mô Tả</th>
+                        <td id="detailMoTa"></td>
+                    </tr>
+                    <tr>
+                        <th>Số Điện Thoại</th>
+                        <td id="detailSoDienThoai"></td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td id="detailEmail"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        getPhongBanData();
+
+        function getPhongBanData(page = 1, searchQuery = "") {
+            $.ajax({
+                type: "GET",
+                url: "/PhongBans/SearchPhongBan",
+                data: { searchQuery: searchQuery, page: page, pageSize: 5 },
+                success: function (data) {
+                    $("#tblBody").empty();
+                    if (data.phongBans.length > 0) {
+                        for (var i = 0; i < data.phongBans.length; i++) {
+                            $("#tblBody").append("<tr>" +
+                                "<td>" + data.phongBans[i].MaPhongBan + "</td>" +
+                                "<td>" + data.phongBans[i].TenPhongBan + "</td>" +
+                                "<td>" + data.phongBans[i].MoTa + "</td>" +
+                                "<td>" + data.phongBans[i].SoDienThoai + "</td>" +
+                                "<td>" + data.phongBans[i].Email + "</td>" +
+                                "<td>" +
+                                "<a href='#' onclick='getPhongBanById(" + data.phongBans[i].MaPhongBan + ")' class='btn btn-success'>Sửa</a> " +
+                                "<a href='#' onclick='viewPhongBanDetails(" + data.phongBans[i].MaPhongBan + ")' class='btn btn-info'>Xem</a> " +
+                                "<a href='#' onclick='deletePhongBan(" + data.phongBans[i].MaPhongBan + ")' class='btn btn-danger'>Xóa</a>" +
+                                "</td>" +
+                                "</tr>");
+                        }
+                        updatePagination(data.totalPages, data.currentPage);
+                    }
+                },
+                error: function (er) {
+                    alert(er);
+                }
+            });
+        }
+
+        $("#AddNew").click(function () {
+            $("#phongBanForm")[0].reset();
+            $("#MaPhongBan").val(0);
+            $("#btnSavePhongBan").val("Thêm Phòng Ban");
+            $("#btnSavePhongBan").addClass("btn-success");
+            $("#btnSavePhongBan").removeClass("btn-primary");
+            $(".modal-title").text("Thêm Phòng Ban Mới");
+            $("#phongBanModal").modal('show');
+        });
+
+        $("#btnSavePhongBan").click(function () {
+            var oForm = document.forms["phongBanForm"];
+            if ($("#phongBanForm").valid()) {
+                var phongBanID = $("#MaPhongBan").val();
+                var ajaxConfig = {
+                    type: "POST",
+                    url: phongBanID == 0 ? "/PhongBans/AddPhongBan" : "/PhongBans/UpdatePhongBan",
+                    data: new FormData(oForm),
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        if (data.success) {
+                            getPhongBanData();
+                            alert(data.message);
+                            $("#phongBanModal").modal('hide');
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function (er) {
+                        alert("Error: " + er);
+                    }
+                };
+                $.ajax(ajaxConfig);
+                return false;
+            }
+        });
+
+        function getPhongBanById(id) {
+            $("#phongBanForm")[0].reset();
+            $.ajax({
+                type: "GET",
+                url: "/PhongBans/GetPhongBanById",
+                data: { id: id },
+                success: function (response) {
+                    if (response.success) {
+                        $("#MaPhongBan").val(response.data.MaPhongBan);
+                        $("#TenPhongBan").val(response.data.TenPhongBan);
+                        $("#MoTa").val(response.data.MoTa);
+                        $("#SoDienThoai").val(response.data.SoDienThoai);
+                        $("#Email").val(response.data.Email);
+
+                        $(".modal-title").text("Cập Nhật Phòng Ban");
+                        $("#btnSavePhongBan").val("Cập Nhật Phòng Ban");
+                        $("#btnSavePhongBan").removeClass("btn-success").addClass("btn-primary");
+                        $("#phongBanModal").modal('show');
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (er) {
+                    alert("Error: " + er);
+                }
+            });
+        }
+
+        function deletePhongBan(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa phòng ban này?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "/PhongBans/DeletePhongBan",
+                    data: { id: id },
+                    success: function (response) {
+                        if (response.success) {
+                            getPhongBanData();
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function (er) {
+                        alert("Error: " + er);
+                    }
+                });
+            }
+        }
+
+        function viewPhongBanDetails(id) {
+            $.ajax({
+                type: "GET",
+                url: "/PhongBans/GetPhongBanById",
+                data: { id: id },
+                success: function (response) {
+                    if (response.success) {
+                        $("#detailMaPhongBan").text(response.data.MaPhongBan);
+                        $("#detailTenPhongBan").text(response.data.TenPhongBan);
+                        $("#detailMoTa").text(response.data.MoTa);
+                        $("#detailSoDienThoai").text(response.data.SoDienThoai);
+                        $("#detailEmail").text(response.data.Email);
+
+                        $(".modal-title").text("Chi Tiết Phòng Ban");
+                        $("#phongBanDetailModal").modal('show');
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (er) {
+                    alert("Error: " + er);
+                }
+            });
+        }
+
+        function updatePagination(totalPages, currentPage) {
+            $("#pagination").empty();
+            for (var i = 1; i <= totalPages; i++) {
+                var activeClass = i === currentPage ? 'active' : '';
+                $("#pagination").append(`<li class="page-item ${activeClass}"><a class="page-link" href="#" onclick="getPhongBanData(${i})">${i}</a></li>`);
+            }
+        }
+
+        $("#searchQuery").on("input", function () {
+            var searchQuery = $(this).val();
+            getPhongBanData(1, searchQuery);
+        });
+    </script>
+}
