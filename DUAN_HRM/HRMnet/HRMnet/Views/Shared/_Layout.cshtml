@@ -17,36 +17,6 @@
                 <div class="sidebar-sticky">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#">
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                Orders
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                Products
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                Customers
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                Reports
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                Integrations
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="/NhanViens">
                                 Nhân Viên
                             </a>
@@ -59,20 +29,10 @@
                     </ul>
                 </div>
             </nav>
-
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">@ViewBag.Title</h1>
                 </div>
-
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <p>Chào, @User.Identity.Name (@Session["VaiTro"]) | @Html.ActionLink("Đăng xuất", "Logout", "Account")</p>
-                }
-                else
-                {
-                    <p>@Html.ActionLink("Đăng nhập", "Login", "Account")</p>
-                }
 
                 @RenderBody()
                 <hr />
